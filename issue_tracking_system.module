@@ -1,0 +1,247 @@
+<?php
+
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\node\Entity\NodeType;
+use Drupal\taxonomy\Entity\Vocabulary;
+use Drupal\taxonomy\Entity\Term;
+use Drupal\user\Entity\User;
+
+
+/**
+ * Implements hook_install().
+ */
+function issue_tracking_system_install() {
+  $type = NodeType::create([
+    'type' => 'issue',
+    'name' => 'Issue',
+    'description' => 'A Content type for tracking issues.',
+    'display_submitted' => FALSE,
+    'status' => TRUE,
+  ]);
+  $type->save();
+
+  // Create custom fields for the custom content type.
+  $fields = [
+    // Short description field.
+    [
+      'field_name' => 'field_short_description',
+      'label' => 'Short description',
+      'type' => 'text',
+      'cardinality' => 1,
+    ],
+    // Example image field.
+    [
+      'field_name' => 'field_due_date',
+      'label' => 'Due Date',
+      'type' => 'datetime',
+      'settings' => [
+        'datetime_type' => 'datetime',
+      ],
+    ],
+    //
+    [
+      'field_name' => 'field_reporter',
+      'type' => 'entity_reference',
+      'label' => 'Reporter',
+      'cardinality' => 1,
+      'settings' => [
+        'target_type' => 'user',
+        'handler' => 'default',
+        'handler_settings' => [
+          'target_bundles' => [
+            'user' => 'user',
+          ],
+        ],
+      ],
+      'default_value' => [
+        [
+          'target_id' => \Drupal::currentUser()->id(),
+        ],
+      ],
+    ],
+    [
+      'field_name' => 'field_assignee',
+      'type' => 'entity_reference',
+      'label' => 'Assignee',
+      'cardinality' => 1,
+      'settings' => [
+        'target_type' => 'user',
+      ],
+    ],
+    [
+      'field_name' => 'field_watchers',
+      'entity_type' => 'node',
+      'type' => 'entity_reference',
+      'label' => 'Watchers',
+      'cardinality' => -1, // Allow unlimited values.
+      'settings' => [
+        'target_type' => 'user',
+      ],
+    ],
+    [
+      'field_name' => 'field_issue_type',
+      'type' => 'entity_reference',
+      'label' => 'Issue Type',
+      'cardinality' => 1,
+      'settings' => [
+        'target_type' => 'taxonomy_term',
+        'handler' => 'default',
+        'handler_settings' => [
+          'target_bundles' => [
+            'issue_type' => 'issue_type',
+          ],
+        ],
+      ],
+    ],
+    [
+      'field_name' => 'field_priority',
+      'type' => 'entity_reference',
+      'label' => 'Priority',
+      'cardinality' => 1,
+      'settings' => [
+        'target_type' => 'taxonomy_term',
+        'handler' => 'default',
+        'handler_settings' => [
+          'target_bundles' => [
+            'priority' => 'priority',
+          ],
+        ],
+      ],
+    ],
+    [
+      'field_name' => 'field_status',
+      'type' => 'entity_reference',
+      'label' => 'Status',
+      'cardinality' => 1,
+      'settings' => [
+        'target_type' => 'taxonomy_term',
+        'handler' => 'default',
+        'handler_settings' => [
+          'target_bundles' => [
+            'status' => 'status',
+          ],
+        ],
+      ],
+    ],
+  ];
+
+  foreach ($fields as $field) {
+    // Create field storage.
+    FieldStorageConfig::create([
+      'field_name' => $field['field_name'],
+      'entity_type' => 'node',
+      'type' => $field['type'],
+      'settings' => [],
+    ])->save();
+
+    // Attach field to the content type.
+    FieldConfig::create([
+      'field_name' => $field['field_name'],
+      'entity_type' => 'node',
+      'bundle' => 'issue',
+      'label' => $field['label'],
+      'settings' => [],
+    ])->save();
+  }
+
+  // Create the Issue type vocabulary.
+  $issue_type_vocabulary = Vocabulary::create([
+    'vid' => 'issue_type',
+    'name' => 'Issue Type',
+    'description' => 'Vocabulary for issue types',
+  ]);
+  $issue_type_vocabulary->save();
+
+  // Add terms to the Issue type vocabulary.
+  $terms = [
+    'new_feature' => 'New feature',
+    'change' => 'Change',
+    'task' => 'Task',
+    'bug' => 'Bug',
+    'improvement' => 'Improvement',
+  ];
+  foreach ($terms as $tid => $name) {
+    $term = Term::create([
+      'vid' => 'issue_type',
+      'name' => $name,
+      'description' => '',
+      'parent' => 0,
+    ]);
+    $term->save();
+  }
+
+  // Create the Priority vocabulary.
+  $priority_vocabulary = Vocabulary::create([
+    'vid' => 'priority',
+    'name' => 'Priority',
+    'description' => 'Vocabulary for issue priorities',
+  ]);
+  $priority_vocabulary->save();
+
+  // Add terms to the Priority vocabulary.
+  $priority_terms = [
+    'critical' => 'Critical',
+    'high' => 'High',
+    'low' => 'Low',
+    'trivial' => 'Trivial',
+  ];
+  foreach ($priority_terms as $tid => $name) {
+    $term = Term::create([
+      'vid' => 'priority',
+      'name' => $name,
+    ]);
+    $term->save();
+  }
+
+  // Create the Status vocabulary.
+  $status_vocabulary = Vocabulary::create([
+    'vid' => 'status',
+    'name' => 'Status',
+    'description' => 'Vocabulary for issue statuses',
+  ]);
+  $status_vocabulary->save();
+
+  // Add terms to the Status vocabulary.
+  $status_terms = [
+    'todo' => 'To Do',
+    'in_progress' => 'In Progress',
+    'in_review' => 'In Review',
+    'done' => 'Done',
+  ];
+  foreach ($status_terms as $tid => $name) {
+    $term = Term::create([
+      'vid' => 'status',
+      'name' => $name,
+    ]);
+    $term->save();
+  }
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function issue_tracking_system_uninstall() {
+  // Delete the content type.
+  $entity_type_manager = \Drupal::entityTypeManager();
+  $node_type_storage = $entity_type_manager->getStorage('node_type');
+  $node_type = $node_type_storage->load('issue');
+  if ($node_type) {
+    $node_type->delete();
+  }
+
+  // Delete the vocabularies.
+  $vocabulary_storage = $entity_type_manager->getStorage('taxonomy_vocabulary');
+  $vocab_issue_type = $vocabulary_storage->load('issue_type');
+  if ($vocab_issue_type) {
+    $vocab_issue_type->delete();
+  }
+  $vocab_priority = $vocabulary_storage->load('priority');
+  if ($vocab_priority) {
+    $vocab_priority->delete();
+  }
+  $vocab_status = $vocabulary_storage->load('status');
+  if ($vocab_status) {
+    $vocab_status->delete();
+  }
+}
