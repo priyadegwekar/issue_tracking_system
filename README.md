@@ -14,10 +14,11 @@ This module used to create an issue tracking system with the following features:
 ## Configuration
 
 1. After Installation go to (admin/structure/types/manage/issue/form-display) and (/admin/structure/types/manage/issue/display) enable all the custom fields.
-2. Create 5 to 10 content with Issue Content Type for testing the module. Add different assignee in every 3rd content.
-3. Place custom block with name 'Latest Assigned Issues Block' in a reigon (`/admin/structure/block`).
-4. Also create 5 to 10 users for testing.
-5. Then test the 'Latest Assigned Issues Block' with different users.
+2. Manually select entity reference type by going every reference field.(There are three entity reference field for taxonomy and three for user.
+3. Create 5 to 10 content with Issue Content Type for testing the module. Add different assignee in every 3rd content.
+4. Place custom block with name 'Latest Assigned Issues Block' in a reigon (`/admin/structure/block`).
+5. Also create 5 to 10 users for testing.
+6. Then test the 'Latest Assigned Issues Block' with different users.
 
 ## Credits/Maintainer
 
