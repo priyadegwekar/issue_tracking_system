@@ -16,8 +16,8 @@ This module used to create an issue tracking system with the following features:
 1. After Installation Create 5 to 10 content with Issue Content Type for testing the module. Add different assignee in every 3rd content.
 2. Place custom block with name 'Latest Assigned Issues Block' in a reigon (`/admin/structure/block`).
 3. Also create 5 to 10 users for testing.
-4. Then test with different users.
+4. Then test the 'Latest Assigned Issues Block' with different users.
 
 ## Credits/Maintainer
 
-This module was developed by Priya Degwekar for assignment purpose.
+This module is developed by Priya Degwekar for assignment purpose.
