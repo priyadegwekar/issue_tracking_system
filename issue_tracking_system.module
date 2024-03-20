@@ -30,7 +30,7 @@ function issue_tracking_system_install() {
       'type' => 'text',
       'cardinality' => 1,
     ],
-    // Example image field.
+    // Due date field.
     [
       'field_name' => 'field_due_date',
       'label' => 'Due Date',
@@ -39,7 +39,7 @@ function issue_tracking_system_install() {
         'datetime_type' => 'datetime',
       ],
     ],
-    //
+    // Reporter field.
     [
       'field_name' => 'field_reporter',
       'type' => 'entity_reference',
